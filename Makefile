@@ -67,9 +67,9 @@ OBJS = src/btree/btree.o \
 	   $(WIN32RES)
 
 REGRESSCHECKS = btree_sys_check \
+				bitmap_scan \
 				btree_compression \
 				btree_print \
-				bitmap_scan \
 				collate \
 				ddl \
 				explain \
@@ -85,8 +85,9 @@ REGRESSCHECKS = btree_sys_check \
 				tableam \
 				toast \
 				types
-ISOLATIONCHECKS = btree_print_backend_id \
+ISOLATIONCHECKS = bitmap_hist_scan \
 				  btree_iterate \
+				  btree_print_backend_id \
 				  fkeys \
 				  insert_fails \
 				  ioc_deadlock \
@@ -124,8 +125,8 @@ TESTGRESCHECKS_PART_2 = t/checkpoint_concurrent_test.py \
 						t/checkpoint_split1_test.py \
 						t/checkpoint_split2_test.py \
 						t/checkpoint_split3_test.py \
-						t/checkpoint_update_test.py \
 						t/checkpoint_update_compress_test.py \
+						t/checkpoint_update_test.py \
 						t/eviction_full_memory_test.py \
 						t/indices_build_test.py
 
@@ -138,6 +139,7 @@ include $(PGXS)
 ifeq ($(shell expr $(MAJORVERSION) \>= 15), 1)
   TESTGRESCHECKS_PART_2 += t/merge_into_test.py
   ISOLATIONCHECKS += isol_merge
+  REGRESSCHECKS += merge_into
 endif
 
 regresscheck: | install
