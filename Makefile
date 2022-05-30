@@ -27,14 +27,19 @@ OBJS = src/btree/btree.o \
 	   src/catalog/ddl.o \
 	   src/catalog/free_extents.o \
 	   src/catalog/indices.o \
+	   src/catalog/o_aggregate_cache.o \
+	   src/catalog/o_amop_cache.o \
+	   src/catalog/o_amproc_cache.o \
+	   src/catalog/o_class_cache.o \
 	   src/catalog/o_enum_cache.o \
 	   src/catalog/o_indices.o \
-	   src/catalog/o_opclass.o \
+	   src/catalog/o_operator_cache.o \
+	   src/catalog/o_opclass_cache.o \
+	   src/catalog/o_proc_cache.o \
 	   src/catalog/o_range_cache.o \
-	   src/catalog/o_record_cache.o \
+	   src/catalog/o_sys_cache.o \
 	   src/catalog/o_tables.o \
 	   src/catalog/o_type_cache.o \
-	   src/catalog/o_type_element_cache.o \
 	   src/catalog/sys_trees.o \
 	   src/checkpoint/checkpoint.o \
 	   src/orioledb.o \
@@ -61,6 +66,7 @@ OBJS = src/btree/btree.o \
 	   src/utils/compress.o \
 	   src/utils/o_buffers.o \
 	   src/utils/page_pool.o \
+	   src/utils/planner.o \
 	   src/utils/seq_buf.o \
 	   src/utils/stopevent.o \
 	   src/utils/ucm.o \
@@ -71,6 +77,7 @@ REGRESSCHECKS = btree_sys_check \
 				btree_print \
 				bitmap_scan \
 				collate \
+				createas \
 				ddl \
 				explain \
 				foreign_keys \
@@ -78,6 +85,8 @@ REGRESSCHECKS = btree_sys_check \
 				indices_build \
 				ioc \
 				joins \
+				opclass \
+				partial \
 				primary_key \
 				row_level_locks \
 				subquery \
@@ -101,6 +110,7 @@ ISOLATIONCHECKS = btree_print_backend_id \
 				  rightlink \
 				  rll \
 				  rll_2 \
+				  table_lock_test \
 				  uniq
 TESTGRESCHECKS_PART_1 = t/checkpointer_test.py \
 						t/eviction_bgwriter_test.py \
@@ -113,6 +123,7 @@ TESTGRESCHECKS_PART_1 = t/checkpointer_test.py \
 						t/o_tables_test.py \
 						t/o_tables_2_test.py \
 						t/recovery_test.py \
+						t/recovery_opclass_test.py \
 						t/recovery_worker_test.py \
 						t/replication_test.py \
 						t/types_test.py \
@@ -127,7 +138,11 @@ TESTGRESCHECKS_PART_2 = t/checkpoint_concurrent_test.py \
 						t/checkpoint_update_test.py \
 						t/checkpoint_update_compress_test.py \
 						t/eviction_full_memory_test.py \
-						t/indices_build_test.py
+						t/indices_build_test.py \
+						t/trigger_test.py \
+						t/vacuum_test.py \
+						t/reindex_test.py \
+						t/schema_test.py
 
 ifdef USE_PGXS
 PG_CONFIG = pg_config

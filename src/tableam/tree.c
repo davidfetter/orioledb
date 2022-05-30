@@ -17,7 +17,7 @@
 #include "orioledb.h"
 
 #include "btree/btree.h"
-#include "catalog/o_type_cache.h"
+#include "catalog/o_sys_cache.h"
 #include "catalog/sys_trees.h"
 #include "recovery/recovery.h"
 #include "tableam/toast.h"
@@ -731,11 +731,14 @@ o_idx_cmp_value_bounds(OBTreeValueBound *bound1,
 			bool		coercible2 = o_bound_is_coercible(bound2, field);
 
 			if (coercible1 && coercible2)
-				res = o_call_comparator(field->comparator, bound1->value, bound2->value);
+				res = o_call_comparator(field->comparator, bound1->value,
+										bound2->value);
 			else if (coercible1)
-				res = -o_call_comparator(bound2->comparator, bound2->value, bound1->value);
+				res = -o_call_comparator(bound2->comparator, bound2->value,
+										 bound1->value);
 			else if (coercible2)
-				res = o_call_comparator(bound1->comparator, bound1->value, bound2->value);
+				res = o_call_comparator(bound1->comparator, bound1->value,
+										bound2->value);
 			else
 				res = o_call_comparator(o_find_comparator(field->opfamily,
 														  bound1->type,
@@ -816,7 +819,7 @@ o_idx_cmp(BTreeDescr *desc,
 				n;
 	int			cmp;
 
-	o_type_cmp_datoid = desc->oids.datoid;
+	o_sys_cache_search_datoid = desc->oids.datoid;
 
 	if (!IS_BOUND_KEY_TYPE(keyType1) || !IS_BOUND_KEY_TYPE(keyType2))
 	{

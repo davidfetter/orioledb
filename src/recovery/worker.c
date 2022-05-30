@@ -188,7 +188,6 @@ recovery_worker_main(Datum main_arg)
 		RegisterTimeout(DEADLOCK_TIMEOUT, CheckDeadLockAlert);
 		/* enable relation cache invalidation (remove old table descriptors) */
 		RelationCacheInitialize();
-		InitCatalogCache();
 		SharedInvalBackendInit(false);
 
 		SetProcessingMode(NormalProcessing);
@@ -588,12 +587,12 @@ apply_tbl_insert(OTableDescr *descr, OTuple tuple,
 		if (primary)
 		{
 			callbackInfo.modifyCallback = recovery_insert_primary_callback;
-			callbackInfo.insertToDeleted = recovery_insert_primary_callback;
+			callbackInfo.modifyDeletedCallback = recovery_insert_primary_callback;
 		}
 		else
 		{
 			callbackInfo.modifyCallback = recovery_insert_overwrite_callback;
-			callbackInfo.insertToDeleted = recovery_insert_overwrite_callback;
+			callbackInfo.modifyDeletedCallback = recovery_insert_overwrite_callback;
 		}
 		tts_orioledb_fill_key_bound(slot, id, &keyBound);
 		modify_result = o_btree_modify(&id->desc, BTreeOperationInsert,
@@ -647,8 +646,7 @@ apply_tbl_delete(OTableDescr *descr, OTuple key,
 			BTreeModifyCallbackInfo callbackInfo = {
 				.waitCallback = NULL,
 				.modifyCallback = o_delete_copy_callback,
-				.insertToDeleted = NULL,
-				.deleteDeleted = NULL,
+				.modifyDeletedCallback = NULL,
 				.needsUndoForSelfCreated = false,
 				.arg = &tupCopy
 			};
@@ -678,8 +676,7 @@ apply_tbl_delete(OTableDescr *descr, OTuple key,
 			BTreeModifyCallbackInfo callbackInfo = {
 				.waitCallback = NULL,
 				.modifyCallback = recovery_delete_overwrite_callback,
-				.insertToDeleted = NULL,
-				.deleteDeleted = NULL,
+				.modifyDeletedCallback = NULL,
 				.needsUndoForSelfCreated = false,
 				.arg = NULL
 			};
@@ -727,8 +724,7 @@ apply_tbl_update(OTableDescr *descr, OTuple tuple,
 			BTreeModifyCallbackInfo callbackInfo = {
 				.waitCallback = NULL,
 				.modifyCallback = o_update_copy_callback,
-				.insertToDeleted = NULL,
-				.deleteDeleted = NULL,
+				.modifyDeletedCallback = NULL,
 				.needsUndoForSelfCreated = false,
 				.arg = &tupCopy
 			};
@@ -787,7 +783,7 @@ apply_tbl_update(OTableDescr *descr, OTuple tuple,
 												   new_slot,
 												   tree->econtext))
 				{
-					callbackInfo.insertToDeleted = recovery_insert_overwrite_callback;
+					callbackInfo.modifyDeletedCallback = recovery_insert_overwrite_callback;
 					callbackInfo.modifyCallback = recovery_insert_overwrite_callback;
 					new_stup = tts_orioledb_make_secondary_tuple(new_slot, tree, true);
 					(void) o_btree_modify(&tree->desc, BTreeOperationInsert,

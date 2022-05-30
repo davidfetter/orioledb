@@ -232,16 +232,16 @@ SELECT count(*) FROM bitmap_test
      8
 (1 row)
 
--- Tests for bitmap EXPLAIN ANALYZE, BUFFERS
-EXPLAIN (FORMAT JSON)
-	SELECT count(*) FROM bitmap_test WHERE i < 100;
-ERROR:  Only text explain format now supported
 -- Wrapper function, which converts result of SQL query to the text
-CREATE OR REPLACE FUNCTION query_to_text(sql TEXT) RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION query_to_text(sql TEXT, out result text)
+	RETURNS SETOF TEXT AS $$
 	BEGIN
-		RETURN QUERY EXECUTE sql;
+		FOR result IN EXECUTE sql LOOP
+			RETURN NEXT;
+		END LOOP;
 	END $$
 LANGUAGE plpgsql;
+-- Tests for bitmap EXPLAIN ANALYZE, BUFFERS
 SELECT regexp_replace(t, '[\d\.]+', 'x', 'g')
 FROM query_to_text('EXPLAIN
 						SELECT count(*) FROM bitmap_test WHERE i < 100') as t;
@@ -351,6 +351,114 @@ FROM query_to_text('EXPLAIN (ANALYZE, COSTS OFF, BUFFERS)
  Planning Time: x ms
  Execution Time: x ms
 (16 rows)
+
+-- Tests for bitmap EXPLAIN FORMAT JSON
+SELECT regexp_replace(t, '[\d\.]+', 'x', 'g')
+FROM query_to_text('EXPLAIN (FORMAT JSON, ANALYZE, COSTS OFF, BUFFERS)
+						SELECT count(*) FROM bitmap_test WHERE i < 100;') as t;
+                    regexp_replace                    
+------------------------------------------------------
+ [                                                   +
+   {                                                 +
+     "Plan": {                                       +
+       "Node Type": "Aggregate",                     +
+       "Strategy": "Plain",                          +
+       "Partial Mode": "Simple",                     +
+       "Parallel Aware": false,                      +
+       "Async Capable": false,                       +
+       "Actual Startup Time": x,                     +
+       "Actual Total Time": x,                       +
+       "Actual Rows": x,                             +
+       "Actual Loops": x,                            +
+       "Shared Hit Blocks": x,                       +
+       "Shared Read Blocks": x,                      +
+       "Shared Dirtied Blocks": x,                   +
+       "Shared Written Blocks": x,                   +
+       "Local Hit Blocks": x,                        +
+       "Local Read Blocks": x,                       +
+       "Local Dirtied Blocks": x,                    +
+       "Local Written Blocks": x,                    +
+       "Temp Read Blocks": x,                        +
+       "Temp Written Blocks": x,                     +
+       "Plans": [                                    +
+         {                                           +
+           "Node Type": "Custom Scan",               +
+           "Parent Relationship": "Outer",           +
+           "Custom Plan Provider": "o_scan",         +
+           "Parallel Aware": false,                  +
+           "Async Capable": false,                   +
+           "Relation Name": "bitmap_test",           +
+           "Alias": "bitmap_test",                   +
+           "Actual Startup Time": x,                 +
+           "Actual Total Time": x,                   +
+           "Actual Rows": x,                         +
+           "Actual Loops": x,                        +
+           "Custom Scan Subtype": "Bitmap Heap Scan",+
+           "Recheck Cond": "(i < x)",                +
+           "Rows Removed by Index Recheck": x,       +
+           "Plans": [                                +
+             {                                       +
+               "Node Type": "Bitmap Index Scan",     +
+               "Parent Relationship": "Outer",       +
+               "Parallel Aware": false,              +
+               "Async Capable": false,               +
+               "Index Name": "bitmap_test_ixx",      +
+               "Actual Startup Time": x,             +
+               "Actual Total Time": x,               +
+               "Actual Rows": x,                     +
+               "Actual Loops": x,                    +
+               "Index Cond": "(i < x)",              +
+               "Shared Hit Blocks": x,               +
+               "Shared Read Blocks": x,              +
+               "Shared Dirtied Blocks": x,           +
+               "Shared Written Blocks": x,           +
+               "Local Hit Blocks": x,                +
+               "Local Read Blocks": x,               +
+               "Local Dirtied Blocks": x,            +
+               "Local Written Blocks": x,            +
+               "Temp Read Blocks": x,                +
+               "Temp Written Blocks": x,             +
+               "Secondary Index Pages": {            +
+                 "Index Name": "bitmap_test_ixx",    +
+                 "Read": x                           +
+               }                                     +
+             }                                       +
+           ],                                        +
+           "Primary Pages": {                        +
+             "Read": x                               +
+           },                                        +
+           "Shared Hit Blocks": x,                   +
+           "Shared Read Blocks": x,                  +
+           "Shared Dirtied Blocks": x,               +
+           "Shared Written Blocks": x,               +
+           "Local Hit Blocks": x,                    +
+           "Local Read Blocks": x,                   +
+           "Local Dirtied Blocks": x,                +
+           "Local Written Blocks": x,                +
+           "Temp Read Blocks": x,                    +
+           "Temp Written Blocks": x                  +
+         }                                           +
+       ]                                             +
+     },                                              +
+     "Planning": {                                   +
+       "Shared Hit Blocks": x,                       +
+       "Shared Read Blocks": x,                      +
+       "Shared Dirtied Blocks": x,                   +
+       "Shared Written Blocks": x,                   +
+       "Local Hit Blocks": x,                        +
+       "Local Read Blocks": x,                       +
+       "Local Dirtied Blocks": x,                    +
+       "Local Written Blocks": x,                    +
+       "Temp Read Blocks": x,                        +
+       "Temp Written Blocks": x                      +
+     },                                              +
+     "Planning Time": x,                             +
+     "Triggers": [                                   +
+     ],                                              +
+     "Execution Time": x                             +
+   }                                                 +
+ ]
+(1 row)
 
 -- Tests for intersection/union of all possible bitmap entries
 CREATE OR REPLACE FUNCTION bitmap_test_high(int4) RETURNS int4
