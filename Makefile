@@ -102,6 +102,7 @@ ISOLATIONCHECKS = bitmap_hist_scan \
 				  rightlink \
 				  rll \
 				  rll_2 \
+				  table_lock_test \
 				  uniq
 TESTGRESCHECKS_PART_1 = t/checkpointer_test.py \
 						t/eviction_bgwriter_test.py \
