@@ -78,6 +78,7 @@ REGRESSCHECKS = btree_sys_check \
 				indices_build \
 				ioc \
 				joins \
+				op_class \
 				primary_key \
 				row_level_locks \
 				subquery \
