@@ -89,6 +89,9 @@ REGRESSCHECKS = btree_sys_check \
 ISOLATIONCHECKS = bitmap_hist_scan \
 				  btree_iterate \
 				  btree_print_backend_id \
+				  cluster \
+				  deadlock_detected \
+				  explain_format_json \
 				  fkeys \
 				  insert_fails \
 				  ioc_deadlock \
@@ -98,11 +101,19 @@ ISOLATIONCHECKS = bitmap_hist_scan \
 				  isol_rr \
 				  isol_rr_bscan \
 				  isol_rr_seqscan \
+				  isol_serializable \
+				  isol_test \
 				  load_refind_page \
 				  merge \
 				  rightlink \
 				  rll \
 				  rll_2 \
+				  server_closed_1 \
+				  server_closed_2 \
+				  server_closed_3 \
+				  server_closed_4 \
+				  server_closed_5 \
+				  server_closed_6 \
 				  table_lock_test \
 				  uniq
 TESTGRESCHECKS_PART_1 = t/checkpointer_test.py \
