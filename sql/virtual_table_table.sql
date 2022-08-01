@@ -32,3 +32,19 @@ CREATE TEMP TABLE o_test_1 (val_1 int)USING orioledb;
 INSERT INTO o_test_1 VALUES (1);
 
 SELECT ctid,cmin,* FROM o_test_1;
+
+--------------------------------------------------
+
+CREATE EXTENSION IF NOT EXISTS orioledb;
+
+CREATE TABLE o_test(val_1 serial, val_2 timestamptz default now())USING orioledb;
+
+INSERT INTO o_test DEFAULT VALUES;
+
+SELECT val_1,
+       pg_xact_commit_timestamp(xmin) >= val_2
+FROM o_test
+ORDER BY val_1;
+
+DROP TABLE o_test;
+
